@@ -1,0 +1,12 @@
+apifairy==0.9.1
+Flask[async]==2.1.2
+Flask-SQLAlchemy==2.5.1
+marshmallow-sqlalchemy==0.28.0
+requests==2.20.0
+beautifulsoup4==4.9.1
+deepdiff==5.0.2
+parameterized==0.7.4
+requests-futures==1.0.0
+mock==4.0.2
+pylint==2.6.0
+googletrans==3.1.0a0
