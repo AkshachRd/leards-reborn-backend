@@ -1,9 +1,8 @@
-from apifairy import arguments, other_responses, response
-from flask import abort, request
-import json
+from apifairy import other_responses, response, authenticate
+from flask import abort
 import sys
 
-from project import ma
+from project import ma, token_auth
 from .schemas import PronunciationSchema, PartsOfSpeechSchema
 from . import parser_api_blueprint
 
@@ -15,11 +14,6 @@ from englishwiktionaryparser import EnglishWiktionaryParser
 # -------
 
 
-class NewWordInfoSchema(ma.Schema):
-    """Schema defining the attributes when fetching word's info."""
-    word = ma.String(required=True)
-
-
 class WordInfoSchema(ma.Schema):
     """Schema defining the attributes in a word info."""
     id = ma.String()
@@ -29,21 +23,19 @@ class WordInfoSchema(ma.Schema):
     partsOfSpeech = ma.Nested(PartsOfSpeechSchema)
 
 
-new_word_info_schema = NewWordInfoSchema()
 word_info_schema = WordInfoSchema()
 
 
-@parser_api_blueprint.get('/')
-@arguments(new_word_info_schema)
+@parser_api_blueprint.get('/<string:word>')
+@authenticate(token_auth)
 @response(word_info_schema, 200)
-@other_responses({404: {'message': 'Unknown word'}})
-def get_word_info(data):
+@other_responses({404: 'Unknown word'})
+def get_word_info(word):
     """Return word info"""
     parser = EnglishWiktionaryParser()
-    # word_data = parser.fetch(request.args.get('word'))
-    word_data = parser.fetch(data['word'])
+    word_data = parser.fetch(word)
 
     if not word_data:
         abort(404)
-    print(json.dumps(word_data[0]))
+
     return word_data[0]

@@ -39,11 +39,15 @@ The project utilizes the following modules:
 """
 
 from apifairy import APIFairy
-from flask import Flask, json
+from flask import Flask
+from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from flask_marshmallow import Marshmallow
+from .database import db
 
 apifairy = APIFairy()
 ma = Marshmallow()
+basic_auth = HTTPBasicAuth()
+token_auth = HTTPTokenAuth()
 
 
 def create_app():
@@ -52,6 +56,8 @@ def create_app():
     app.config['APIFAIRY_TITLE'] = 'Leards API'
     app.config['APIFAIRY_VERSION'] = '0.1'
     app.config['APIFAIRY_UI'] = 'elements'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'path_to_db?check_same_thread=False'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     initialize_extensions(app)
     register_blueprints(app)
@@ -61,8 +67,11 @@ def create_app():
 def initialize_extensions(app):
     apifairy.init_app(app)
     ma.init_app(app)
+    db.init_app(app)
 
 
 def register_blueprints(app):
     from project.parser_api import parser_api_blueprint
+    from project.user_api import user_api_blueprint
     app.register_blueprint(parser_api_blueprint, url_prefix='/parser')
+    app.register_blueprint(user_api_blueprint, url_prefix='/user')
